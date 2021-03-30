@@ -12,8 +12,8 @@ using readers and writers.
 
 # Improvements
 Some improvements were made such as adding a design rework using
-a blue and white colour pallet. This makes the program look more
-appealing and the blues used are easy on the eyes.
+a .css file. This allowed us to change the colours of the list, buttons,
+and background to a blue theme to make it easier on the user's eyes.
 
 # How To Run
 To use this program yourself you must first open up your cmd or other
@@ -25,8 +25,7 @@ well as a JavaFX jdk imported properly as a library to be used for the
 project. You can then run it through your IDE like IntelliJ and the program
 should pop up as a new window. This program requires you to run both the 
 server and the ui separately using two different run configurations.
-The window allows you to select files on either side and with a button
-press can transfer these files.
+The program should then allow you to select files on either side and transfer them.
 
 # Other Resources
 https://stackoverflow.com/questions/541487/implements-runnable-vs-extends-thread-in-java
