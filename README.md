@@ -8,7 +8,7 @@ server directory that can be selected and transferred to either side
 using readers and writers.
 
 
-<img src="image/A2Screenshot.PNG" width="200">
+<img src="image/A2Screenshot.PNG" width="600">
 
 # Improvements
 Some improvements were made such as adding a design rework using
