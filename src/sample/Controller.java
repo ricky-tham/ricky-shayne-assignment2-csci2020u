@@ -51,6 +51,7 @@ public class Controller {
             Parent root1 = (Parent) loader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
+            stage.setTitle("File Share");
             stage.show();
         }
         catch(IOException e){
