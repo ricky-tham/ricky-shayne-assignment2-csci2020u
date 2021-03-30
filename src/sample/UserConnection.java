@@ -14,11 +14,20 @@ public class UserConnection implements Runnable{
     private ObjectInputStream ois;
     private static PrintStream ps;
 
+    /*
+     * Constructor for the user connection client
+     * @param socket    socket used for user connection
+     */
     public UserConnection(Socket socket){
         this.userSocket = socket;
         sa = userSocket.getLocalSocketAddress();
     }
 
+    /*
+     * Reads through each line of the object stream and calls transfer
+     * Calls userFiles transfer when word is download
+     * Calls serverFiles transfer when word is upload
+     */
     @Override
     public void run(){
         try {
@@ -26,7 +35,8 @@ public class UserConnection implements Runnable{
             br = new BufferedReader(new InputStreamReader(userSocket.getInputStream()));
             ois = new ObjectInputStream(userSocket.getInputStream());
             String temp;
-            while((temp = br.readLine()) != null){ //might have to change this and the br.readLine() like in example
+            //had to change to inline while readLine()
+            while((temp = br.readLine()) != null){
                 if(temp.equals("download")){
                     transfer(userFiles);
                 }
@@ -39,6 +49,11 @@ public class UserConnection implements Runnable{
         }
     }
 
+    /*
+     * The transfer method that writes a file to the folder chosen
+     * Writes based on byte size
+     * @param file   the directory wanted to transfer from
+     */
     public void transfer(File file){
         try {
             DataInputStream dis = new DataInputStream(userSocket.getInputStream());
@@ -48,6 +63,7 @@ public class UserConnection implements Runnable{
             int bytes;
             long size = dis.readLong();
             byte[] arr = new byte[100000000];
+            //checks byte size when transfering and subtracts from total bytes
             while (size > 0 && (bytes = dis.read(arr, 0, (int) Math.min(arr.length, size))) > -1) {
                 os.write(arr, 0, bytes);
                 size -= bytes;
@@ -60,6 +76,10 @@ public class UserConnection implements Runnable{
 
     }
 
+    /*
+     * Opens and returns a fileName to the PrintStream
+     * So it can be displayed in the new list on the ui
+     */
     public void receive() throws IOException{
         ps = new PrintStream(userSocket.getOutputStream());
         ps.println(this.serverFiles.getName());

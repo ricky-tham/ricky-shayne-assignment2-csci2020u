@@ -11,8 +11,6 @@ import javafx.stage.Stage;
 import java.net.Socket;
 
 public class Controller {
-
-
     private static String serverAddress = "localhost";
     public static int socketPort = 49351;
     private Socket socket;
@@ -26,6 +24,9 @@ public class Controller {
     @FXML
     private ListView<String> serverFileList;
 
+    /*
+     * Standard initialize method that fills both lists with the proper directory files
+     */
     public void initialize() throws IOException{
         userFileList.setItems(FXCollections.observableArrayList(uFiles.list()));
         serverFileList.setItems(FXCollections.observableArrayList(sFiles.list()));
@@ -37,14 +38,15 @@ public class Controller {
         }
     }
 
-    //refreshes client to show new files after upload/download
+    /*
+     * Refreshes client to show new files after upload/download
+     * Does this by using the root parent to remake and load the scene
+     */
     public void refresh(){
         Stage prevStage = (Stage) gridPane.getScene().getWindow();
         prevStage.hide();
         try{
-            //need to make this
-            //could recreate the scene using root and parent
-            //can do this in a similar way to the scene change in our midterm assignment
+            //can recreate the scene using root and parent
             FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
             Parent root1 = (Parent) loader.load();
             Stage stage = new Stage();
@@ -56,19 +58,20 @@ public class Controller {
         }
     }
 
+    /*
+     * Gets the data from the file specified
+     * Writes data to the new file in the directory
+     * @param file   the file name of the file selected to transfer
+     */
     public void transfer(String file){
         try{
             File newFile = new File(file);
             byte[] arr = new byte[(int) newFile.length()];
-
             FileInputStream fis = new FileInputStream(newFile);
             BufferedInputStream bis = new BufferedInputStream(fis);
             DataInputStream dis = new DataInputStream(bis);
             dis.readFully(arr, 0 , arr.length);
-
             OutputStream os = socket.getOutputStream();
-
-            //transfer
             System.out.println(newFile.getName());
             DataOutputStream dos = new DataOutputStream(os);
             dos.writeUTF(newFile.getName());
@@ -81,6 +84,12 @@ public class Controller {
         }
     }
 
+    /*
+     * Sets up proper Streams and calls transfer with download
+     * Sends download command to server
+     * Supplies new files to the userFileList and calls refresh to display them
+     * @param e   the download button press
+     */
     @FXML
     public void download(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
@@ -94,6 +103,12 @@ public class Controller {
         refresh();
     }
 
+    /*
+     * Sets up proper Streams and calls transfer with upload
+     * Sends upload command to server
+     * Supplies new files to the serverFileList and calls refresh to display them
+     * @param e   the upload button press
+     */
     @FXML
     public void upload(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
