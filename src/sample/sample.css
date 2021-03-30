@@ -1,0 +1,20 @@
+.anchorPane{
+    -fx-background-color: steelblue;
+}
+
+.button{
+    -fx-background-color: skyblue;
+    -fx-font-weight: bold;
+}
+
+.list-cell:even{
+    -fx-background-color: powderblue;
+}
+
+.list-cell:odd{
+    -fx-background-color: lightsteelblue;
+}
+
+.list-cell:filled:selected{
+    -fx-background-color: steelblue;
+}

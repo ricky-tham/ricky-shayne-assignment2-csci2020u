@@ -3,6 +3,7 @@
 <?import javafx.scene.control.ListView?>
 
 
+<?import java.net.URL?>
 <GridPane fx:id="gridPane" alignment="center" hgap="10" vgap="10" xmlns:fx="http://javafx.com/fxml" fx:controller="sample.Controller">
     <AnchorPane prefHeight="600" prefWidth="600" styleClass="anchorPane">
         <Button fx:id="downloadButton"  text="Download" styleClass="button" onAction="#download" GridPane.columnIndex="0" GridPane.rowIndex="0" layoutX="420" layoutY="510"/>
@@ -10,4 +11,7 @@
         <ListView fx:id="userFileList"  styleClass="list" GridPane.columnIndex="0" GridPane.rowIndex="1" prefHeight="500" prefWidth="300"/>
         <ListView fx:id="serverFileList"  styleClass="list" GridPane.columnIndex="1" GridPane.rowIndex="1" prefHeight="500" prefWidth="300" layoutX="300"/>
     </AnchorPane>
+    <stylesheets>
+        <URL value="@sample.css" />
+    </stylesheets>
 </GridPane>
