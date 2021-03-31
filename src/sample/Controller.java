@@ -1,4 +1,5 @@
 package sample;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
 import javafx.scene.control.SelectionMode;
@@ -24,7 +25,8 @@ public class Controller {
     private ListView<String> userFileList;
     @FXML
     private ListView<String> serverFileList;
-    private ListView<String> selected = new ListView<>();
+    private ListView<String> serverSelected = new ListView<>();
+
 
     /*
      * Standard initialize method that fills both lists with the proper directory files
@@ -32,13 +34,35 @@ public class Controller {
     public void initialize() throws IOException{
         userFileList.setItems(FXCollections.observableArrayList(uFiles.list()));
         serverFileList.setItems(FXCollections.observableArrayList(sFiles.list()));
+        //set to multiple
         userFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         serverFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        userFileList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("ListView selection changed from oldValue = "
-                    + oldValue + " to newValue = " + newValue);
-            selected.setItems(userFileList.getSelectionModel().getSelectedItems());
-        });
+
+        //track changes to selection for userFileList and set items to another listView
+        userFileList.getSelectionModel().selectedItemProperty()
+                .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
+
+                    ObservableList<String> selected = userFileList.getSelectionModel().getSelectedItems();
+                    //tracking selected items
+                    StringBuilder builder = new StringBuilder("Selected items userFileList:");
+                    for (String file : selected) {
+                        builder.append("\n" + file);
+                    }
+                    System.out.println(builder);
+                });
+
+        //track changes to selection for serverFileList and set items to another listView
+        serverFileList.getSelectionModel().selectedItemProperty()
+                .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
+
+                    ObservableList<String> selected = serverFileList.getSelectionModel().getSelectedItems();
+                    //tracking selected items
+                    StringBuilder builder = new StringBuilder("Selected items for serverFileList:");
+                    for (String file : selected) {
+                        builder.append("\n" + file);
+                    }
+                    System.out.println(builder);
+                });
         try{
             socket = new Socket(serverAddress, socketPort);
         }
@@ -104,7 +128,7 @@ public class Controller {
     public void download(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
         ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        String selected = serverFileList.getSelectionModel().getSelectedItem();
+        String selected = serverSelected.getSelectionModel().getSelectedItem();
         String path = sFiles + "/" + selected;
         ps.println("download");
         transfer(path);

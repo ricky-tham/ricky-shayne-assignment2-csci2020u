@@ -63,7 +63,7 @@ public class UserConnection implements Runnable{
             int bytes;
             long size = dis.readLong();
             byte[] arr = new byte[100000000];
-            //checks byte size when transfering and subtracts from total bytes
+            //checks byte size when transferring and subtracts from total bytes
             while (size > 0 && (bytes = dis.read(arr, 0, (int) Math.min(arr.length, size))) > -1) {
                 os.write(arr, 0, bytes);
                 size -= bytes;
