@@ -11,6 +11,8 @@ import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Controller {
     private static String serverAddress = "localhost";
@@ -25,8 +27,6 @@ public class Controller {
     private ListView<String> userFileList;
     @FXML
     private ListView<String> serverFileList;
-    private ListView<String> serverSelected = new ListView<>();
-
 
     /*
      * Standard initialize method that fills both lists with the proper directory files
@@ -38,31 +38,32 @@ public class Controller {
         userFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         serverFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        //track changes to selection for userFileList and set items to another listView
+        //track changes to selection for userFileList
         userFileList.getSelectionModel().selectedItemProperty()
                 .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
 
                     ObservableList<String> selected = userFileList.getSelectionModel().getSelectedItems();
                     //tracking selected items
                     StringBuilder builder = new StringBuilder("Selected items userFileList:");
-                    for (String file : selected) {
-                        builder.append("\n" + file);
+                    for (String fileName : selected) {
+                        builder.append("\n" + fileName);
                     }
                     System.out.println(builder);
                 });
 
-        //track changes to selection for serverFileList and set items to another listView
+        //track changes to selection for serverFileList
         serverFileList.getSelectionModel().selectedItemProperty()
                 .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
 
                     ObservableList<String> selected = serverFileList.getSelectionModel().getSelectedItems();
                     //tracking selected items
                     StringBuilder builder = new StringBuilder("Selected items for serverFileList:");
-                    for (String file : selected) {
-                        builder.append("\n" + file);
+                    for (String fileName : selected) {
+                        builder.append("\n" + fileName);
                     }
                     System.out.println(builder);
                 });
+
         try{
             socket = new Socket(serverAddress, socketPort);
         }
@@ -97,21 +98,27 @@ public class Controller {
      * Writes data to the new file in the directory
      * @param file   the file name of the file selected to transfer
      */
-    public void transfer(String file){
+    public void transfer(List<String> files){
         try{
-            File newFile = new File(file);
-            byte[] arr = new byte[(int) newFile.length()];
-            FileInputStream fis = new FileInputStream(newFile);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            DataInputStream dis = new DataInputStream(bis);
-            dis.readFully(arr, 0 , arr.length);
-            OutputStream os = socket.getOutputStream();
-            System.out.println(newFile.getName());
-            DataOutputStream dos = new DataOutputStream(os);
-            dos.writeUTF(newFile.getName());
-            dos.writeLong(arr.length);
-            dos.write(arr, 0, arr.length);
-            dos.flush();
+            //this for loop currently looks at each file in the list and individually transfers, hopefully
+            //doesn't work right now I don't know if I need to do something in UserConnection.java
+            //problem is that it only transfers one file still
+            for (String fileForTransfer : files) {
+                File newFile = new File(fileForTransfer);
+                System.out.println("File: " + newFile + "\nFrom: " + fileForTransfer);
+                byte[] arr = new byte[(int) newFile.length()];
+                FileInputStream fis = new FileInputStream(newFile);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                DataInputStream dis = new DataInputStream(bis);
+                dis.readFully(arr, 0, arr.length);
+                OutputStream os = socket.getOutputStream();
+                System.out.println(newFile.getName());
+                DataOutputStream dos = new DataOutputStream(os);
+                dos.writeUTF(newFile.getName());
+                dos.writeLong(arr.length);
+                dos.write(arr, 0, arr.length);
+                dos.flush();
+            }
         }
         catch(IOException e){
             e.printStackTrace();
@@ -128,10 +135,22 @@ public class Controller {
     public void download(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
         ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        String selected = serverSelected.getSelectionModel().getSelectedItem();
-        String path = sFiles + "/" + selected;
+
+        //need many selected not using .getSelectedItem but .getSelectedItems
+        ObservableList<String> selected = serverFileList.getSelectionModel().getSelectedItems();
+
+        //need many paths, possibly a list?
+        List<String> pathsList = new ArrayList<String>();
+
+        //adds paths from ObservableList (selected) to List (pathsList)
+        for (String pathDir : selected) {
+            pathsList.add(sFiles + "/" + pathDir);
+        }
+
         ps.println("download");
-        transfer(path);
+
+        //need transfer to take a list of strings
+        transfer(pathsList);
         userFileList.setItems(null);
         userFileList.setItems(FXCollections.observableArrayList(uFiles.list()));
         refresh();
@@ -147,10 +166,18 @@ public class Controller {
     public void upload(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
         ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        String selected = userFileList.getSelectionModel().getSelectedItem();
-        String path = uFiles + "/" + selected;
+        //need many selected not using .getSelectedItem but .getSelectedItems
+        ObservableList<String> selected = userFileList.getSelectionModel().getSelectedItems();
+
+        //need many paths, possibly a list?
+        List<String> pathsList = new ArrayList<String>();
+
+        //adds paths from ObservableList (selected) to List (pathsList)
+        for (String pathDir : selected) {
+            pathsList.add(uFiles + "/" + pathDir);
+        }
         ps.println("upload");
-        transfer(path);
+        transfer(pathsList);
         serverFileList.setItems(null);
         serverFileList.setItems(FXCollections.observableArrayList(sFiles.list()));
         refresh();
