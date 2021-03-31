@@ -1,6 +1,7 @@
 package sample;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.control.ListView;
 import java.io.*;
@@ -23,6 +24,7 @@ public class Controller {
     private ListView<String> userFileList;
     @FXML
     private ListView<String> serverFileList;
+    private ListView<String> selected = new ListView<>();
 
     /*
      * Standard initialize method that fills both lists with the proper directory files
@@ -30,6 +32,13 @@ public class Controller {
     public void initialize() throws IOException{
         userFileList.setItems(FXCollections.observableArrayList(uFiles.list()));
         serverFileList.setItems(FXCollections.observableArrayList(sFiles.list()));
+        userFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        serverFileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        userFileList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("ListView selection changed from oldValue = "
+                    + oldValue + " to newValue = " + newValue);
+            selected.setItems(userFileList.getSelectionModel().getSelectedItems());
+        });
         try{
             socket = new Socket(serverAddress, socketPort);
         }
