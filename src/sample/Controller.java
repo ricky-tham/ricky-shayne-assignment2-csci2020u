@@ -82,7 +82,7 @@ public class Controller {
         try{
             //can recreate the scene using root and parent
             FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
-            Parent root1 = (Parent) loader.load();
+            Parent root1 = loader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
             stage.setTitle("File Share");
@@ -98,27 +98,29 @@ public class Controller {
      * Writes data to the new file in the directory
      * @param file   the file name of the file selected to transfer
      */
-    public void transfer(List<String> files){
+    public void transfer(String file){
         try{
-            //this for loop currently looks at each file in the list and individually transfers, hopefully
+            //this is for the for loop. Currently looks at each file in the list and individually transfers, hopefully
             //doesn't work right now I don't know if I need to do something in UserConnection.java
             //problem is that it only transfers one file still
-            for (String fileForTransfer : files) {
-                File newFile = new File(fileForTransfer);
-                System.out.println("File: " + newFile + "\nFrom: " + fileForTransfer);
-                byte[] arr = new byte[(int) newFile.length()];
-                FileInputStream fis = new FileInputStream(newFile);
-                BufferedInputStream bis = new BufferedInputStream(fis);
-                DataInputStream dis = new DataInputStream(bis);
-                dis.readFully(arr, 0, arr.length);
-                OutputStream os = socket.getOutputStream();
-                System.out.println(newFile.getName());
-                DataOutputStream dos = new DataOutputStream(os);
-                dos.writeUTF(newFile.getName());
-                dos.writeLong(arr.length);
-                dos.write(arr, 0, arr.length);
-                dos.flush();
-            }
+
+            File newFile = new File(file);
+            System.out.println("File: " + newFile);
+            byte[] arr = new byte[(int) newFile.length()];
+            FileInputStream fis = new FileInputStream(newFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+
+            DataInputStream dis = new DataInputStream(bis);
+            dis.readFully(arr, 0, arr.length);
+            OutputStream os = socket.getOutputStream();
+            System.out.println(newFile.getName());
+
+            DataOutputStream dos = new DataOutputStream(os);
+            dos.writeUTF(newFile.getName());
+            dos.writeLong(arr.length);
+            dos.write(arr, 0, arr.length);
+            dos.flush();
+
         }
         catch(IOException e){
             e.printStackTrace();
@@ -147,10 +149,11 @@ public class Controller {
             pathsList.add(sFiles + "/" + pathDir);
         }
 
-        ps.println("download");
-
         //need transfer to take a list of strings
-        transfer(pathsList);
+        for (String fileToTransfer : pathsList) {
+            ps.println("download");
+            transfer(fileToTransfer);
+        }
         userFileList.setItems(null);
         userFileList.setItems(FXCollections.observableArrayList(uFiles.list()));
         refresh();
@@ -166,18 +169,20 @@ public class Controller {
     public void upload(ActionEvent e) throws IOException{
         PrintStream ps = new PrintStream(socket.getOutputStream());
         ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-        //need many selected not using .getSelectedItem but .getSelectedItems
-        ObservableList<String> selected = userFileList.getSelectionModel().getSelectedItems();
 
-        //need many paths, possibly a list?
-        List<String> pathsList = new ArrayList<String>();
+        ObservableList<String> selected = userFileList.getSelectionModel().getSelectedItems();
+        List<String> pathsList = new ArrayList<>();
 
         //adds paths from ObservableList (selected) to List (pathsList)
         for (String pathDir : selected) {
             pathsList.add(uFiles + "/" + pathDir);
         }
-        ps.println("upload");
-        transfer(pathsList);
+
+        //when transferring for some reason it doesn't transfer two separate docs despite transferring twice?
+        for (String fileToTransfer : pathsList) {
+            ps.println("upload");
+            transfer(fileToTransfer);
+        }
         serverFileList.setItems(null);
         serverFileList.setItems(FXCollections.observableArrayList(sFiles.list()));
         refresh();

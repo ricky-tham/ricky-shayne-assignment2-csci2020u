@@ -57,7 +57,7 @@ public class UserConnection implements Runnable{
     public void transfer(File file){
         try {
             DataInputStream dis = new DataInputStream(userSocket.getInputStream());
-            String temp = dis.readUTF();
+            String temp = dis.readUTF(); // Problem is here. Does dis.readUTF() only once.
             OutputStream os = new FileOutputStream(file + "/" + temp);
 
             int bytes;
@@ -72,7 +72,6 @@ public class UserConnection implements Runnable{
         } catch(IOException e) {
             e.printStackTrace();
         }
-
 
     }
 
